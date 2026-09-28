@@ -1,0 +1,6 @@
+spring:
+  jpa:
+    open-in-view: false
+  task:
+    scheduling:
+      enabled: false
