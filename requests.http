@@ -1,0 +1,45 @@
+@base = http://localhost:8080/api/v1
+
+### Criar evento
+POST {{base}}/events
+Content-Type: application/json
+
+{
+  "name": "Show de abertura",
+  "venue": "Teatro Municipal",
+  "startsAt": "2026-12-15T15:00:00"
+}
+
+### Listar eventos
+GET {{base}}/events
+
+### Criar lote
+# Troque o eventId pelo id retornado acima.
+POST {{base}}/events/00000000-0000-0000-0000-000000000000/lots
+Content-Type: application/json
+
+{
+  "name": "1º lote",
+  "price": 80.00,
+  "totalQuantity": 10
+}
+
+### Consultar lote
+GET {{base}}/lots/00000000-0000-0000-0000-000000000000
+
+### Reservar
+# Responde 500 "TODO RN-08" até ReservationService.create existir.
+POST {{base}}/reservations
+Content-Type: application/json
+
+{
+  "lotId": "00000000-0000-0000-0000-000000000000",
+  "customerEmail": "voce@email.com",
+  "quantity": 2
+}
+
+### Pagar
+POST {{base}}/reservations/00000000-0000-0000-0000-000000000000/pay
+
+### Cancelar
+POST {{base}}/reservations/00000000-0000-0000-0000-000000000000/cancel
