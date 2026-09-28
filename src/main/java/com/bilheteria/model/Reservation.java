@@ -1,6 +1,7 @@
 package com.bilheteria.model;
 
 import com.bilheteria.enums.ReservationStatus;
+import com.bilheteria.exception.BusinessRuleException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,14 +65,27 @@ public class Reservation {
     }
 
     public void confirmPayment(LocalDateTime now) {
-        throw new UnsupportedOperationException("TODO RN-09: Reservation.confirmPayment");
+        ensurePending();
+        if (now.isAfter(expiresAt)) {
+            throw new BusinessRuleException("reserva expirada");
+        }
+        status = ReservationStatus.PAID;
+        paidAt = now;
     }
 
     public void cancel() {
-        throw new UnsupportedOperationException("TODO RN-10: Reservation.cancel");
+        ensurePending();
+        status = ReservationStatus.CANCELLED;
     }
 
     public void expire() {
-        throw new UnsupportedOperationException("TODO RN-11: Reservation.expire");
+        ensurePending();
+        status = ReservationStatus.EXPIRED;
+    }
+
+    private void ensurePending() {
+        if (status != ReservationStatus.PENDING) {
+            throw new BusinessRuleException("reserva não está pendente");
+        }
     }
 }
