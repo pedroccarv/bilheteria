@@ -1,7 +1,9 @@
 package com.bilheteria.service;
 
 import com.bilheteria.dto.request.CreateReservationRequest;
+import com.bilheteria.exception.BusinessRuleException;
 import com.bilheteria.exception.NotFoundException;
+import com.bilheteria.model.Lot;
 import com.bilheteria.model.Reservation;
 import com.bilheteria.repository.LotRepository;
 import com.bilheteria.repository.ReservationRepository;
@@ -23,7 +25,15 @@ public class ReservationService {
 
     @Transactional
     public Reservation create(CreateReservationRequest request) {
-        throw new UnsupportedOperationException("TODO RN-08: ReservationService.create");
+        Lot lot = lotRepository.findById(request.lotId())
+                .orElseThrow(() -> new NotFoundException("lote não encontrado"));
+        LocalDateTime now = now();
+        if (!lot.isOpenForSalesAt(now)) {
+            throw new BusinessRuleException("lote fora da janela de vendas");
+        }
+        lot.reserve(request.quantity());
+        Reservation reservation = new Reservation(lot, request.customerEmail(), request.quantity(), now);
+        return reservationRepository.save(reservation);
     }
 
     @Transactional(readOnly = true)
@@ -34,12 +44,17 @@ public class ReservationService {
 
     @Transactional
     public Reservation pay(UUID id) {
-        throw new UnsupportedOperationException("TODO RN-09: ReservationService.pay");
+        Reservation reservation = get(id);
+        reservation.confirmPayment(now());
+        return reservation;
     }
 
     @Transactional
     public Reservation cancel(UUID id) {
-        throw new UnsupportedOperationException("TODO RN-10: ReservationService.cancel");
+        Reservation reservation = get(id);
+        reservation.cancel();
+        reservation.getLot().release(reservation.getQuantity());
+        return reservation;
     }
 
     public LocalDateTime now() {

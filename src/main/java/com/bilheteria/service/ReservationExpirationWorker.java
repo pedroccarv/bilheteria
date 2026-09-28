@@ -1,6 +1,7 @@
 package com.bilheteria.service;
 
-import com.bilheteria.repository.LotRepository;
+import com.bilheteria.exception.NotFoundException;
+import com.bilheteria.model.Reservation;
 import com.bilheteria.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,10 +14,12 @@ import java.util.UUID;
 public class ReservationExpirationWorker {
 
     private final ReservationRepository reservationRepository;
-    private final LotRepository lotRepository;
 
     @Transactional
     public void expireOne(UUID reservationId) {
-        throw new UnsupportedOperationException("TODO RN-11: ReservationExpirationWorker.expireOne");
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("reserva não encontrada"));
+        reservation.expire();
+        reservation.getLot().release(reservation.getQuantity());
     }
 }
