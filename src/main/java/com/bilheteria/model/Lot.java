@@ -1,5 +1,6 @@
 package com.bilheteria.model;
 
+import com.bilheteria.exception.BusinessRuleException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -67,19 +68,26 @@ public class Lot {
     }
 
     public void reserve(int quantity) {
-        throw new UnsupportedOperationException("TODO RN-05: Lot.reserve");
+        if (quantity > availableQuantity) {
+            throw new BusinessRuleException("sem estoque");
+        }
+        availableQuantity -= quantity;
     }
 
     public void release(int quantity) {
-        throw new UnsupportedOperationException("TODO RN-05: Lot.release");
+        if (availableQuantity + quantity > totalQuantity) {
+            throw new BusinessRuleException("quantidade devolvida ultrapassa o total do lote");
+        }
+        availableQuantity += quantity;
     }
 
     public boolean isOpenForSalesAt(LocalDateTime now) {
-        if (salesStart != null && salesEnd != null) {
-            if (!now.isAfter(salesEnd) && !now.isAfter(event.getStartsAt())) {
-                return true;
-            }
+        if (salesStart == null || now.isBefore(salesStart)) {
+            return false;
         }
-        return false;
+        if (salesEnd != null && now.isAfter(salesEnd)) {
+            return false;
+        }
+        return !now.isAfter(event.getStartsAt());
     }
 }
