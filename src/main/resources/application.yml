@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: bilheteria
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bilheteria}
+    username: ${DB_USER:bilheteria}
+    password: ${DB_PASSWORD:bilheteria}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
